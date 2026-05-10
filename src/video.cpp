@@ -178,8 +178,20 @@ void idt_init() {
 
 void keyboard_handler_c() {
     unsigned char scancode = inb(0x60);
-
-    if (!(scancode & 0x80)) {
+    print_char('1');
+    if (scancode == 0x1C) {
+        print_char('2');
+        char c = '\n';
+        int next = (buffer_head + 1) & (BUFFER_SIZE - 1);
+        
+        if (next != buffer_tail) {
+            input_buffer[buffer_head] = c;
+            buffer_head = next;
+        }
+        
+    }
+    else if (!(scancode & 0x80)) {
+        print_char('3');
         char c = keyboard_map[scancode];
         if (c) {
             int next = (buffer_head + 1) & (BUFFER_SIZE - 1);
@@ -190,4 +202,33 @@ void keyboard_handler_c() {
         }
     }
     outb(0x20, 0x20);
+}
+
+void input(char* output, int len) {
+    volatile unsigned short* video = (unsigned short*)0xB8000;
+    int i = 0;
+    while (1) {
+        asm("sti");
+        char c = getchar();
+        print_char('4');
+        if (c == '\b') {
+            if (i > 0 && cursor.col > 0) {
+                int pos = cursor.row * 80 + (cursor.col - 1);
+                video[pos] = (0x0F << 8) | ' ';
+                setCursor(cursor.row, cursor.col - 1);
+                i--;
+            }
+        }
+        else if (c == '\n') {
+            print_char(c);
+            break;
+        }
+        else {
+            print_char(c);
+            if (i < len - 1) {
+                output[i++] = c;
+            }
+        }
+    }
+    output[i] = '\0';
 }
