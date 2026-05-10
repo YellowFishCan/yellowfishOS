@@ -6,6 +6,7 @@
 
 extern "C" void kernel_main() __attribute__((section(".text.start")));
 
+
 extern "C" void kernel_main() {
     volatile unsigned short* video = (unsigned short*)0xB8000;
 
@@ -14,17 +15,10 @@ extern "C" void kernel_main() {
 
     idt_init();
 
-    char c;
+    char c[256];
 
-    while (1) {
-        asm("sti");
-        c = getchar();
-        if (c == '\b') {
-            video[getRow() * 80 + getCol() - 1] = (0x0F << 8) | ' ';
-            setCursor(getCol() - 1,getRow());
-        }
-        else {
-            print_char(c);
-        }
-    }
+    input(c, 256);
+    print(c);
+    
+    while (1);
 }
