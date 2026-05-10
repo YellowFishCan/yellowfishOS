@@ -32,6 +32,12 @@ void print(const char* msg);
 
 //keyboard input
 
+#define BUFFER_SIZE 256
+
+extern char input_buffer[BUFFER_SIZE];
+extern int buffer_head;
+extern int buffer_tail;
+
 void int80_handler();
 
 void set_idt_gate(uint8_t num, uint32_t handler, uint16_t selector, uint8_t type_attr);
@@ -48,8 +54,11 @@ void keyboard_handler_c();
 
 char getchar();
 
+void input(char* output, int len);
+
 #ifdef __cplusplus
 }
+
 #endif
 
 #endif
